@@ -1,7 +1,7 @@
 library cache_image;
 
 import 'dart:async';
-import 'dart:ui';
+import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,6 +26,7 @@ class CacheImage extends ImageProvider<CacheImage> {
         this.duration = const Duration(seconds: 1),
         this.durationMultiplier = 1.5,
         this.durationExpiration = const Duration(seconds: 10),
+        this.inMemory = true,
       })  : assert(url != null),
         _resource =
         Resource(url, duration, durationMultiplier, durationExpiration),
@@ -49,9 +50,9 @@ class CacheImage extends ImageProvider<CacheImage> {
 
   final String url;
 
-  Resource _resource;
+  final bool inMemory;
 
-  ImageStreamCompleter completer;
+  Resource _resource;
 
   @override
   Future<CacheImage> obtainKey(ImageConfiguration configuration) {
@@ -60,16 +61,29 @@ class CacheImage extends ImageProvider<CacheImage> {
 
   @override
   ImageStreamCompleter load(CacheImage key, DecoderCallback decode) {
-    print("CACHE IMAAAAAAAAGEEEEEEE");
-    if(completer != null) return completer;
-    completer = MultiFrameImageStreamCompleter(
-      codec: CacheImageService.fetchImage(_resource),
-      scale: key.scale,
-      informationCollector: () sync* {
-        yield DiagnosticsProperty<ImageProvider>(
-            'Image provider: $this \n Image key: $key', this,
-            style: DiagnosticsTreeStyle.errorProperty);
-    });
-    return completer;
+    if(inMemory) return ImageManager.fetchImage(key);
+    return MultiFrameImageStreamCompleter(
+        codec: CacheImageService.fetchImage(_resource),
+        scale: key.scale,
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<ImageProvider>(
+              'Image provider: $this \n Image key: $key', this,
+              style: DiagnosticsTreeStyle.errorProperty);
+        });
   }
+}
+
+class ImageManager{
+
+  static HashMap<String, ImageStreamCompleter>  _manager = HashMap();
+
+  static ImageStreamCompleter fetchImage(CacheImage key){
+    if(_manager.containsKey(key.url)) return _manager[key.url];
+    _manager[key.url] = MultiFrameImageStreamCompleter(
+      codec: CacheImageService.fetchImage(key._resource),
+      scale: key.scale,
+    );
+    return _manager[key.url];
+  }
+
 }
