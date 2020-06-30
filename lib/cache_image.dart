@@ -57,6 +57,7 @@ class CacheImage extends ImageProvider<CacheImage> {
 
   @override
   ImageStreamCompleter load(CacheImage key, DecoderCallback decode) {
+    print("CACHE IMAAAAAAAAGEEEEEEE");
     return MultiFrameImageStreamCompleter(
         codec: CacheImageService.fetchImage(_resource),
         scale: key.scale,
