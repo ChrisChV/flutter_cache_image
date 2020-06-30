@@ -1,6 +1,7 @@
 library cache_image;
 
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -50,6 +51,8 @@ class CacheImage extends ImageProvider<CacheImage> {
 
   Resource _resource;
 
+  ImageStreamCompleter completer;
+
   @override
   Future<CacheImage> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<CacheImage>(this);
@@ -58,13 +61,15 @@ class CacheImage extends ImageProvider<CacheImage> {
   @override
   ImageStreamCompleter load(CacheImage key, DecoderCallback decode) {
     print("CACHE IMAAAAAAAAGEEEEEEE");
-    return MultiFrameImageStreamCompleter(
-        codec: CacheImageService.fetchImage(_resource),
-        scale: key.scale,
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<ImageProvider>(
-              'Image provider: $this \n Image key: $key', this,
-              style: DiagnosticsTreeStyle.errorProperty);
-        });
+    if(completer != null) return completer;
+    completer = MultiFrameImageStreamCompleter(
+      codec: CacheImageService.fetchImage(_resource),
+      scale: key.scale,
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>(
+            'Image provider: $this \n Image key: $key', this,
+            style: DiagnosticsTreeStyle.errorProperty);
+    });
+    return completer;
   }
 }
