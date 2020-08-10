@@ -22,6 +22,8 @@ class CacheImageService{
     }
     else url += cacheImage.standardUrl;
     Uri standardUrl = Uri.parse(url);
+    print("AAAA");
+    print(standardUrl.toString());
     return ui.webOnlyInstantiateImageCodecFromUrl(
         standardUrl
     ) as Future<ui.Codec>;
