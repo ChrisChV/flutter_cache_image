@@ -14,12 +14,14 @@ class CacheImageService{
 
   static Future<ui.Codec> fetchImage(Resource resource) async{
     HiveCacheImage cacheImage = _getHiveImage(resource.uri);
-    Uri standardUrl;
+    String url = 'https://cors-anywhere.herokuapp.com/';
     if(cacheImage == null){
-      standardUrl = await _storageInstance.refFromURL(resource.uri).getDownloadURL();
-      cacheImage = _saveHiveImage(resource.uri, standardUrl.toString());
+      String imageUrl = (await _storageInstance.refFromURL(resource.uri).getDownloadURL()).toString();
+      url += imageUrl;
+      cacheImage = _saveHiveImage(resource.uri, imageUrl);
     }
-    else standardUrl = Uri.parse(cacheImage.standardUrl);
+    else url += cacheImage.standardUrl;
+    Uri standardUrl = Uri.parse(url);
     return ui.webOnlyInstantiateImageCodecFromUrl(
         standardUrl
     ) as Future<ui.Codec>;
