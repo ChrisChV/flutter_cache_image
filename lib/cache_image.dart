@@ -2,12 +2,15 @@ library cache_image;
 
 import 'dart:async';
 import 'dart:collection';
+import 'package:cache_image/constants.dart';
+import 'package:cache_image/hive_cache_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cache_image/resource.dart';
 import 'package:cache_image/cache_image_mobile.dart'
 if(dart.library.html) 'package:cache_image/cache_image_web.dart';
+import 'package:hive/hive.dart';
 
 /*
  *  ImageCache for Flutter
@@ -17,6 +20,8 @@ if(dart.library.html) 'package:cache_image/cache_image_web.dart';
  *
  *  Released under MIT License.
  */
+
+/// TODO En web activar el CORS en storage
 
 class CacheImage extends ImageProvider<CacheImage> {
   CacheImage(
@@ -54,6 +59,15 @@ class CacheImage extends ImageProvider<CacheImage> {
 
   Resource _resource;
 
+  static Future<void> init() async{
+    if(kIsWeb){
+      Hive..registerAdapter(HiveCacheImageAdapter());
+      if(!Hive.isBoxOpen(Constants.HIVE_CACHE_IMAGE_BOX)){
+        await Hive.openBox(Constants.HIVE_CACHE_IMAGE_BOX);
+      }
+    }
+  }
+
   @override
   Future<CacheImage> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<CacheImage>(this);
@@ -71,6 +85,7 @@ class CacheImage extends ImageProvider<CacheImage> {
               style: DiagnosticsTreeStyle.errorProperty);
         });
   }
+
 }
 
 class ImageManager{
