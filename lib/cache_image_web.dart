@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -7,8 +6,10 @@ import 'package:cache_image/constants.dart';
 import 'package:cache_image/hive_cache_image.dart';
 import 'package:cache_image/resource.dart';
 import 'package:firebase/firebase.dart' as fb;
-import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
+
+
 
 class CacheImageService{
 
@@ -37,18 +38,13 @@ class CacheImageService{
     /*return ui.webOnlyInstantiateImageCodecFromUrl(
         standardUrl
     ) as Future<ui.Codec>;
-    
+
      */
   }
 
   static Future<Uint8List> _downloadImage(Uri standardUrl) async{
-    HttpClient httpClient = new HttpClient();
-    final HttpClientRequest request = await httpClient.getUrl(standardUrl);
-    final HttpClientResponse response = await request.close();
-    return await consolidateHttpClientResponseBytes(
-        response,
-        autoUncompress: false
-    );
+    http.Response response = await http.get(standardUrl);
+    return response.bodyBytes;
   }
 
   static HiveCacheImage _getHiveImage(String gsUrl){
