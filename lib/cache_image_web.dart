@@ -27,7 +27,7 @@ class CacheImageService{
       _saveHiveImage(resource.uri, standardUrl.toString(), bytes);
     }
     else{
-      if(cacheImage.binaryImage != null){
+      if(cacheImage.binaryImage == null){
         standardUrl = Uri.parse(cacheImage.standardUrl);
         bytes = await _downloadImage(standardUrl);
         _saveHiveImage(resource.uri, standardUrl.toString(), bytes);
@@ -35,11 +35,6 @@ class CacheImageService{
       else bytes = cacheImage.binaryImage;
     }
     return ui.instantiateImageCodec(bytes);
-    /*return ui.webOnlyInstantiateImageCodecFromUrl(
-        standardUrl
-    ) as Future<ui.Codec>;
-
-     */
   }
 
   static Future<Uint8List> _downloadImage(Uri standardUrl) async{
