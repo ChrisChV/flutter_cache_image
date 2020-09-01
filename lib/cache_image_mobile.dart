@@ -48,7 +48,7 @@ class CacheImageService {
     if (_fileIsCached(file)) bytes = file.readAsBytesSync();
     else {
       file.create(recursive: true);
-      bytes = await _downloadImage(url, file, retryDuration, maxRetryDuration);
+      bytes = await _downloadImage(url, retryDuration, maxRetryDuration);
       if(bytes.lengthInBytes != 0) file.writeAsBytes(bytes);
       else{
         /// TODO
@@ -67,13 +67,12 @@ class CacheImageService {
 
   static Future<Uint8List> _downloadImage(
     String url,
-    File file,
     Duration retryDuration,
     Duration maxRetryDuration,
   ) async{
     int totalTime = 0;
     Duration _retryDuration = Duration(microseconds: 1);
-    while(file.lengthSync() <= 0){
+    while(totalTime <= maxRetryDuration.inSeconds){
       await Future.delayed(retryDuration).then((_) async{
         try{
           http.Response response = await http.get(url);
@@ -84,7 +83,6 @@ class CacheImageService {
           totalTime += retryDuration.inSeconds;
         }
       });
-      if(totalTime > maxRetryDuration.inSeconds) break;
     }
     return Uint8List(0);
   }
