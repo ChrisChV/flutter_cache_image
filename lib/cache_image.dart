@@ -69,7 +69,7 @@ class CacheImage extends ImageProvider<CacheImage> {
   ImageStreamCompleter load(CacheImage key, DecoderCallback decode) {
     if(inMemory) return ImageManager.fetchImage(key);
     return MultiFrameImageStreamCompleter(
-        codec: CacheImageService.fetchImage(_resource),
+        codec: CacheImageService.fetchImage(url),
         scale: key.scale,
         informationCollector: () sync* {
           yield DiagnosticsProperty<ImageProvider>(
