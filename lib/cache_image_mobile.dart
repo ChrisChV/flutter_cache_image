@@ -19,7 +19,7 @@ class CacheImageService {
     _tempPath = (await getTemporaryDirectory()).path;
   }
 
-  static Future<ui.Codec> fetchImage(Resource resource) async {
+  static Future<ui.Codec> fetchImage3(Resource resource) async {
     Uint8List file;
     await resource.init();
     final bool check = await resource.checkFile();
@@ -34,7 +34,7 @@ class CacheImageService {
     return null;
   }
 
-  static Future<ui.Codec> fetchImage2(
+  static Future<ui.Codec> fetchImage(
     String url, {
     Duration retryDuration =
                     const Duration(seconds: Constants.DEFAULT_RETRY_DURATION),
@@ -74,7 +74,7 @@ class CacheImageService {
     int totalTime = 0;
     Duration _retryDuration = Duration(microseconds: 1);
     while(file.lengthSync() <= 0){
-      await Future.delayed(_retryDuration).then((_) async{
+      await Future.delayed(retryDuration).then((_) async{
         try{
           http.Response response = await http.get(url);
           return response.bodyBytes;
