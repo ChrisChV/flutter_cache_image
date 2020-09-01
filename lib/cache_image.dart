@@ -52,6 +52,7 @@ class CacheImage extends ImageProvider<CacheImage> {
   Resource _resource;
 
   static Future<void> init() async{
+    CacheImageService.init();
     if(kIsWeb){
       Hive..registerAdapter(HiveCacheImageAdapter());
       if(!Hive.isBoxOpen(Constants.HIVE_CACHE_IMAGE_BOX)){
