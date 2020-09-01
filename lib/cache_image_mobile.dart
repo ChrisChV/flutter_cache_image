@@ -71,12 +71,13 @@ class CacheImageService {
     Duration maxRetryDuration,
   ) async{
     int totalTime = 0;
+    Uint8List bytes = Uint8List(0);
     Duration _retryDuration = Duration(microseconds: 1);
     while(totalTime <= maxRetryDuration.inSeconds){
       await Future.delayed(retryDuration).then((_) async{
         try{
           http.Response response = await http.get(url);
-          return response.bodyBytes;
+          bytes = response.bodyBytes;
         }
         catch (error){
           _retryDuration = retryDuration;
@@ -84,7 +85,7 @@ class CacheImageService {
         }
       });
     }
-    return Uint8List(0);
+    return bytes;
   }
 
 
