@@ -72,13 +72,15 @@ class CacheImageService {
     Duration maxRetryDuration,
   ) async{
     int totalTime = 0;
+    Duration _retryDuration = Duration(microseconds: 1);
     while(file.lengthSync() <= 0){
-      await Future.delayed(retryDuration).then((_) async{
+      await Future.delayed(_retryDuration).then((_) async{
         try{
           http.Response response = await http.get(url);
           return response.bodyBytes;
         }
         catch (error){
+          _retryDuration = retryDuration;
           totalTime += retryDuration.inSeconds;
         }
       });
