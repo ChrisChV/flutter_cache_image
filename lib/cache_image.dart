@@ -87,7 +87,7 @@ class ImageManager{
   static ImageStreamCompleter fetchImage(CacheImage key){
     if(_manager.containsKey(key.url)) return _manager[key.url];
     _manager[key.url] = MultiFrameImageStreamCompleter(
-      codec: CacheImageService.fetchImage(key._resource),
+      codec: CacheImageService.fetchImage(key.url),
       scale: key.scale,
     );
     return _manager[key.url];
