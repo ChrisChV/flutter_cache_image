@@ -12,14 +12,6 @@ import 'package:cache_image/cache_image_mobile.dart'
 if(dart.library.html) 'package:cache_image/cache_image_web.dart';
 import 'package:hive/hive.dart';
 
-/*
- *  ImageCache for Flutter
- *
- *  Copyright (c) 2019 Oxequa - Alessio Pracchia
- *  Keep in touch https://www.linkedin.com/in/alessio-pracchia/
- *
- *  Released under MIT License.
- */
 
 /// TODO En web activar el CORS en storage
 
