@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:cache_image/constants.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cache_image/resource.dart';
@@ -49,6 +50,7 @@ class CacheImageService {
     else {
       file.create(recursive: true);
       bytes = await _downloadImage(url, retryDuration, maxRetryDuration);
+
       if(bytes.lengthInBytes != 0) file.writeAsBytes(bytes);
       else{
         /// TODO
@@ -73,7 +75,8 @@ class CacheImageService {
     int totalTime = 0;
     Uint8List bytes = Uint8List(0);
     Duration _retryDuration = Duration(microseconds: 1);
-    while(totalTime <= maxRetryDuration.inSeconds){
+    if(_isGsUrl(url)) url = await _getStandardUrlFromGsUrl(url);
+    while(totalTime <= maxRetryDuration.inSeconds && bytes.lengthInBytes <= 0){
       await Future.delayed(retryDuration).then((_) async{
         try{
           http.Response response = await http.get(url);
@@ -85,8 +88,18 @@ class CacheImageService {
         }
       });
     }
+    print(bytes.lengthInBytes);
     return bytes;
   }
 
+  static bool _isGsUrl(String url){
+    Uri uri = Uri.parse(url);
+    return uri.scheme == Constants.GS_SCHEME;
+  }
+
+  static Future<dynamic> _getStandardUrlFromGsUrl(String gsUrl) async{
+    Uri uri = Uri.parse(gsUrl);
+    return FirebaseStorage.instance.ref().child(uri.path).getDownloadURL();
+  }
 
 }
