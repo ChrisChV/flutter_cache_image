@@ -8,30 +8,37 @@ part of 'hive_cache_image.dart';
 
 class HiveCacheImageAdapter extends TypeAdapter<HiveCacheImage> {
   @override
-  final typeId = 7;
+  final int typeId = 17;
 
   @override
   HiveCacheImage read(BinaryReader reader) {
-    var numOfFields = reader.readByte();
-    var fields = <int, dynamic>{
-      for (var i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return HiveCacheImage(
-      gsUrl: fields[0] as String,
-      standardUrl: fields[1] as String,
-      binaryImage: fields[2] as Uint8List,
+      url: fields[0] as String,
+      binaryImage: fields[1] as Uint8List,
     );
   }
 
   @override
   void write(BinaryWriter writer, HiveCacheImage obj) {
     writer
-      ..writeByte(3)
-      ..writeByte(0)
-      ..write(obj.gsUrl)
-      ..writeByte(1)
-      ..write(obj.standardUrl)
       ..writeByte(2)
+      ..writeByte(0)
+      ..write(obj.url)
+      ..writeByte(1)
       ..write(obj.binaryImage);
   }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HiveCacheImageAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
 }

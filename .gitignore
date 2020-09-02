@@ -10,3 +10,5 @@ idea/
 ios/.generated/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.*
+
+example/android/app/google-services.json

@@ -7,7 +7,6 @@ import 'package:cache_image/hive_cache_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:cache_image/resource.dart';
 import 'package:cache_image/cache_image_mobile.dart'
 if(dart.library.html) 'package:cache_image/cache_image_web.dart';
 import 'package:hive/hive.dart';
@@ -17,42 +16,32 @@ import 'package:hive/hive.dart';
 
 class CacheImage extends ImageProvider<CacheImage> {
   CacheImage(
-      String url, {
-        this.scale = 1.0,
-        this.cache = true,
-        this.duration = const Duration(seconds: 1),
-        this.durationMultiplier = 1.5,
-        this.durationExpiration = const Duration(seconds: 10),
-        this.inMemory = true,
-      })  : assert(url != null),
-        _resource =
-        Resource(url, duration, durationMultiplier, durationExpiration),
-        url = url;
-
-
-  /// The scale to place in the [ImageInfo] object of the image.
-  final double scale;
-
-  /// Enable or disable image caching.
-  final bool cache;
-
-  /// Retry duration if download fails.
-  final Duration duration;
-
-  /// Retry duration multiplier.
-  final double durationMultiplier;
-
-  /// Retry duration expiration.
-  final Duration durationExpiration;
+      this.url, {
+        this.imageScale = Constants.DEFAULT_IMAGE_SCALE,
+        this.enableCache = true,
+        this.retryDuration = const Duration(seconds: Constants.DEFAULT_RETRY_DURATION),
+        this.maxRetryDuration = const Duration(seconds: Constants.DEFAULT_MAX_RETRY_DURATION),
+        this.enableInMemory = true,
+      })  : assert(url != null);
 
   final String url;
 
-  final bool inMemory;
+  /// The scale to place in the [ImageInfo] object of the image.
+  final double imageScale;
 
-  Resource _resource;
+  /// Enable or disable image caching.
+  final bool enableCache;
 
-  static Future<void> init() async{
-    CacheImageService.init();
+  /// Retry duration if download fails.
+  final Duration retryDuration;
+
+  /// Retry duration expiration.
+  final Duration maxRetryDuration;
+
+  final bool enableInMemory;
+
+  static Future<void> init({String proxy}) async{
+    CacheImageService.init(proxy: proxy);
     if(kIsWeb){
       Hive..registerAdapter(HiveCacheImageAdapter());
       if(!Hive.isBoxOpen(Constants.HIVE_CACHE_IMAGE_BOX)){
@@ -68,15 +57,16 @@ class CacheImage extends ImageProvider<CacheImage> {
 
   @override
   ImageStreamCompleter load(CacheImage key, DecoderCallback decode) {
-    if(inMemory) return ImageManager.fetchImage(key);
+    if(enableCache && enableInMemory) return ImageManager.fetchImage(key);
     return MultiFrameImageStreamCompleter(
-        codec: CacheImageService.fetchImage(url),
-        scale: key.scale,
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<ImageProvider>(
-              'Image provider: $this \n Image key: $key', this,
-              style: DiagnosticsTreeStyle.errorProperty);
-        });
+      codec: CacheImageService.fetchImage(
+        url,
+        retryDuration,
+        maxRetryDuration,
+        enableCache
+      ),
+      scale: key.imageScale,
+    );
   }
 
 }
@@ -88,8 +78,13 @@ class ImageManager{
   static ImageStreamCompleter fetchImage(CacheImage key){
     if(_manager.containsKey(key.url)) return _manager[key.url];
     _manager[key.url] = MultiFrameImageStreamCompleter(
-      codec: CacheImageService.fetchImage(key.url),
-      scale: key.scale,
+      codec: CacheImageService.fetchImage(
+        key.url,
+        key.retryDuration,
+        key.maxRetryDuration,
+        key.enableCache,
+      ),
+      scale: key.imageScale,
     );
     return _manager[key.url];
   }

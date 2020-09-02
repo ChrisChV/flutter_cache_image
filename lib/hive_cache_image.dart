@@ -4,21 +4,17 @@ import 'package:hive/hive.dart';
 
 part 'hive_cache_image.g.dart';
 
-@HiveType(typeId: 7)
+@HiveType(typeId: 17)
 class HiveCacheImage{
 
   @HiveField(0)
-  String gsUrl;
+  String url;
 
   @HiveField(1)
-  String standardUrl;
-
-  @HiveField(2)
   Uint8List binaryImage;
 
   HiveCacheImage({
-    this.gsUrl,
-    this.standardUrl,
+    this.url,
     this.binaryImage,
   });
 
